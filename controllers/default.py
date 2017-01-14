@@ -15,12 +15,14 @@ def index():
     """
     response.flash = T("Under Construction")
 
-    token = auth.settings.login_form.accessToken()
-    character_id = auth.user.registration_id
+    if auth.is_logged_in():
+        token = auth.settings.login_form.accessToken()
+        character_id = auth.user.registration_id
 
-    import eveuser
-    character, wallet = eveuser.get_info(token, character_id) if token else None
-    # character, wallet = None, None
+        import eveuser
+        character, wallet = eveuser.get_info(token, character_id)
+    else:
+        character, wallet = None, None
 
     return dict(message=T('Welcome to the EVE Transaction Analyzer'), character=character, wallet=wallet)
 
