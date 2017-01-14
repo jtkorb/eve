@@ -1,3 +1,6 @@
 databases/
 sessions/
+errors/
 private/appconfig.ini
+.pythonhistory
+*.pyc

@@ -11,14 +11,18 @@
 
 def index():
     """
-    example action using the internationalization operator T and flash
-    rendered by views/default/index.html or views/generic.html
-
-    if you need a simple wiki simply replace the two lines below with:
-    return auth.wiki()
+    Landing page for EVE Online users.
     """
-    response.flash = T("Hello World")
-    return dict(message=T('Welcome to web2py!'))
+    response.flash = T("Under Construction")
+
+    token = auth.settings.login_form.accessToken()
+    character_id = auth.user.registration_id
+
+    import eveuser
+    character, wallet = eveuser.get_info(token, character_id) if token else None
+    # character, wallet = None, None
+
+    return dict(message=T('Welcome to the EVE Transaction Analyzer'), character=character, wallet=wallet)
 
 
 def user():
