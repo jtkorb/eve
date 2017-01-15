@@ -61,7 +61,11 @@
         </div>
         <div class="collapse navbar-collapse navbar-ex1-collapse">
           <ul class="nav navbar-nav navbar-right">
+            {{if 'auth' in globals() and auth.is_logged_in():}}
             {{='auth' in globals() and auth.navbar('Welcome',mode='dropdown') or ''}}
+            {{else:}}
+            {{=A(IMG(_src=URL('static', 'images/EVE_SSO_Login_Buttons_Small_Black.png'), _class='btn btn-default navbar-btn', _alt="Log In"), _href=URL('user/login'))}}
+            {{pass}}
           </ul>
           {{if response.menu:}}
           {{=MENU(response.menu, _class='nav navbar-nav',li_class='dropdown',ul_class='dropdown-menu')}}
