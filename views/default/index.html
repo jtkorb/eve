@@ -1,27 +1,73 @@
-{{left_sidebar_enabled, right_sidebar_enabled = True, True}}
+{{left_sidebar_enabled, right_sidebar_enabled = True, False}}
 {{extend 'layout.html'}}
+
+<style>
+table {
+    border-width: 1px;
+    border-style: solid;
+    border-collapse: separate;
+    padding: 3px;
+    }
+tr, th, td{
+    border-width: 1px;
+    border-style: solid;
+    padding: 0px 5px 0px 5px;
+    }
+td.number {
+    text-align: right;
+    }
+th.right {
+    text-align: right;
+    }
+th.center {
+    text-align: center;
+    }
+</style>
 
 <h2>{{=message}}</h2>
 
-{{if character:}}
-<h3>Properties of Your Character</h3>
-{{=BEAUTIFY(character)}}
-{{else:}}
+{{if not user:}}
 Log in to get information about your EVE Online character.
 {{pass}}
 
-{{if wallet:}}
-<h3>Your Wallet(s)</h3>
-{{for w in wallet:}}
-{{if w['balance'] > 0:}}
-Wallet {{=w['wallet_id']}} contains {{='{:,.2f}'.format(w['balance']/100.0)}} ISK.
-{{pass}}
-{{pass}}
+{{if summary:}}
+<h3>Summary of Transactions</h3>
+<table>
+<tr>
+    <th>Item</th>
+    <th>Bought</th><th>Paid</th><th>Average</th>
+    <th>Sold</th><th>Received</th><th>Average</th>
+</tr>
+{{for row in summary:}}
+    <tr><td>{{=row[0]}}</td>
+        <td class="number">{{=row[1]}}</td><td class="number">{{=row[2]}}</td><td class="number">{{=row[3]}}</td>
+        <td class="number">{{=row[4]}}</td><td class="number">{{=row[5]}}</td><td class="number">{{=row[6]}}</td>
+    </tr>
+    {{pass}}
+</table>
 {{pass}}
 
-{{block right_sidebar}}
-{{end}}
+{{if wallet:}}
+<h3>Your Transactions</h3>
+{{=BEAUTIFY(wallet)}}
+{{pass}}
+
 {{block left_sidebar}}
+{{if user:}}
+<p>
+{{=IMG(_src=user.portrait, _alt="Character Portrait")}}<br/>
+<b>{{=user.first_name}} {{=user.last_name or ""}}</b><br/>
+{{=user.race}} {{=user.bloodline}} {{=user.ancestry}}<br/>
+Born <i>{{=user.birthday}}</i>
+</p>
+<p>
+{{=IMG(_src=user.corp_logo, _alt="Corporate Logo")}}<br/>
+Member <i>{{=user.corp_name}}</i>
+</p>
+{{pass}}
+{{end}}
+
+{{block right_sidebar}}
 {{end}}
 
 {{if request.is_local:}}

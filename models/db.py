@@ -90,7 +90,25 @@ plugins = PluginManager()
 # -------------------------------------------------------------------------
 # create all tables needed by auth if not custom tables
 # -------------------------------------------------------------------------
+auth.settings.extra_fields['auth_user'] = [
+    Field('gender'),
+    Field('security_status'),
+    Field('birthday', type='datetime'),
+    Field('description'),
+    Field('corp_name'),
+    Field('corp_logo'),
+    Field('portrait'),
+    Field('ship'),
+    Field('loc'),
+    Field('race'),
+    Field('bloodline'),
+    Field('ancestry'),
+    Field('cached_until', type='datetime')
+]
+
 auth.define_tables(username=False, signature=False)
+db.auth_user.email.writable = False
+db.auth_user.email.readable = False
 
 # -------------------------------------------------------------------------
 # configure email

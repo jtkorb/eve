@@ -1,0 +1,16 @@
+{{left_sidebar_enabled, right_sidebar_enabled = False, False}}
+{{extend 'layout.html'}}
+<h2>Raw Data</h2>
+{{if wallet:}}
+{{=wallet}}
+{{pass}}
+
+<br/><br/><br/>
+
+{{if user:}}
+{{=BEAUTIFY(user)}}
+{{pass}}
+
+{{if request.is_local:}}
+{{=response.toolbar()}}
+{{pass}}

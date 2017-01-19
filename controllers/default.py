@@ -8,24 +8,36 @@
 # - download is for downloading files uploaded in the db (does streaming)
 # -------------------------------------------------------------------------
 
+from datetime import datetime
+import eveuser
+import evesum
 
 def index():
     """
     Landing page for EVE Online users.
     """
-    response.flash = T("Under Construction")
-
     if auth.is_logged_in():
-        token = auth.settings.login_form.accessToken()
-        character_id = auth.user.registration_id
-
-        import eveuser
-        character, wallet = eveuser.get_info(token, character_id)
+        user = db(db.auth_user.id == auth.user.id).select().first()  # get up-to-date auth data
+        if user.cached_until == None or datetime.utcnow() > user.cached_until:
+            user, wallet = eveuser.get_info(db, auth)
+        else:
+            wallet = db(db.wallet.user_id == auth.user.id).select()
+        user.birthday = user.birthday.strftime("%b %d, %Y at %H:%M:%S GMT")
+        summary = evesum.do_summary(wallet)
     else:
-        character, wallet = None, None
+        user, wallet, summary = None, None, None
 
-    return dict(message=T('Welcome to the EVE Transaction Analyzer'), character=character, wallet=wallet)
+    return dict(message=T('Welcome to the EVE Transaction Analyzer'), user=user, wallet=wallet, summary=summary)
 
+@auth.requires_login()
+def raw():
+    user = db(db.auth_user.id == auth.user.id).select().first()  # get up-to-date auth data
+    dbw = db.wallet
+    wallet = SQLFORM.grid(dbw.user_id == auth.user.id, deletable=False, editable=False, create=False,
+                          fields=[dbw.transaction_date_time,
+                                  dbw.transaction_type, dbw.type_id, dbw.type_name,
+                                  dbw.station_name, dbw.quantity, dbw.price])
+    return dict(user=user, wallet=wallet)
 
 def user():
     """
