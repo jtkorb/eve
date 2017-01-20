@@ -34,29 +34,29 @@ Log in to get information about your EVE Online character.
 <h3>Summary of Transactions</h3>
 <table>
 <tr>
-    <th>Item</th>
-    <th>Bought</th><th>Paid</th><th>Average</th>
-    <th>Sold</th><th>Received</th><th>Average</th>
+    <th>Item</th><th>Group</th><th>Currently<br/>Own</th>
+    <th>Quantity<br/>Bought</th><th>Total<br/>Paid</th><th>Average<br/>Cost</th>
+    <th>Quantity<br/>Sold</th><th>Total<br/>Received</th><th>Average<br/>Price</th>
 </tr>
 {{for row in summary:}}
-    <tr><td>{{=row[0]}}</td>
-        <td class="number">{{=row[1]}}</td><td class="number">{{=row[2]}}</td><td class="number">{{=row[3]}}</td>
-        <td class="number">{{=row[4]}}</td><td class="number">{{=row[5]}}</td><td class="number">{{=row[6]}}</td>
+    <tr><td>{{=row[0]}}</td><td>{{=row[1]}}</td><td class="number">{{=row[2]}}</td>
+        <td class="number">{{=row[3]}}</td><td class="number">{{=row[4]}}</td><td class="number">{{=row[5]}}</td>
+        <td class="number">{{=row[6]}}</td><td class="number">{{=row[7]}}</td><td class="number">{{=row[8]}}</td>
     </tr>
     {{pass}}
 </table>
 {{pass}}
 
-{{if wallet:}}
+{{if transactions:}}
 <h3>Your Transactions</h3>
-{{=BEAUTIFY(wallet)}}
+{{=BEAUTIFY(transactions)}}
 {{pass}}
 
 {{block left_sidebar}}
 {{if user:}}
 <p>
 {{=IMG(_src=user.portrait, _alt="Character Portrait")}}<br/>
-<b>{{=user.first_name}} {{=user.last_name or ""}}</b><br/>
+<b>{{=user.first_name}} {{=user.last_name or ""}}</b> ({{=user.registration_id}})<br/>
 {{=user.race}} {{=user.bloodline}} {{=user.ancestry}}<br/>
 Born <i>{{=user.birthday}}</i>
 </p>

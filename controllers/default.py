@@ -17,17 +17,14 @@ def index():
     Landing page for EVE Online users.
     """
     if auth.is_logged_in():
-        user = db(db.auth_user.id == auth.user.id).select().first()  # get up-to-date auth data
-        if user.cached_until == None or datetime.utcnow() > user.cached_until:
-            user, wallet = eveuser.get_info(db, auth)
-        else:
-            wallet = db(db.wallet.user_id == auth.user.id).select()
-        user.birthday = user.birthday.strftime("%b %d, %Y at %H:%M:%S GMT")
-        summary = evesum.do_summary(wallet)
+        cached_until = db(db.auth_user.id == auth.user.id).select().first().cached_until  # get up-to-date auth data
+        use_cache = cached_until != None and datetime.utcnow() > cached_until
+        user, transactions = eveuser.get_info(use_cache, db, auth)
+        summary = evesum.do_summary(db, auth.user.id, transactions)
     else:
-        user, wallet, summary = None, None, None
+        user, transactions, summary = None, None, None
 
-    return dict(message=T('Welcome to the EVE Transaction Analyzer'), user=user, wallet=wallet, summary=summary)
+    return dict(message=T('Welcome to the EVE Transaction Analyzer'), user=user, transactions=transactions, summary=summary)
 
 @auth.requires_login()
 def raw():

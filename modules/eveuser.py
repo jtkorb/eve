@@ -15,21 +15,36 @@ DT_FORMAT = '%Y-%m-%d %H:%M:%S'
 def extractURL(r, name):
     return r.json()[name]["href"]
 
-def set_swagger_data(user, token, character_id):
-    client = SwaggerClient.from_url(SWAGGER_URL)
-    r = client.Character.get_characters_character_id(character_id=character_id).result()
+def update_swagger_data(esi, db, user, token, character_id):
+    r = esi.Character.get_characters_character_id(character_id=character_id).result()
     user.gender = r['gender']
     user.security_status = r['security_status']
     user.birthday = r['birthday']
     user.description = r['description']
     user.update_record()
 
-    # wallet = client.Wallet.get_characters_character_id_wallets(character_id=character_id,
-    #     _request_options={"headers" : { "Authorization" : "Bearer " + token}}).result()
+    r = esi.Assets.get_characters_character_id_assets(
+        character_id=character_id,
+        _request_options={"headers" : { "Authorization" : "Bearer " + token}}).result()
 
+    print "assets retrieved: %d" % len(r)
+    db.assets.truncate()
+    for item in r:
+        d = {}
+        d['user_id'] = user.id
+        d['type_id'] = type_id = item['type_id']
+        d['item_id'] = item['item_id']
+        d['is_singleton'] = item['is_singleton']
+        d['location_flag'] = item['location_flag']
+        d['location_id'] = item['location_id']
+        d['location_type'] = item['location_type']
+        d['quantity'] = item['quantity']
+        db.assets.insert(**d)
+        check_update_type_group_ids(esi, db, type_id)
     return
 
-def set_crest_data(user, token, character_id):
+def update_crest_data(user, token, character_id):
+    # TODO Pull this from the esi data instead
 
     # Walk down the tree to find the character information...
     r = requests.get(CREST_ROOT_URL)
@@ -50,7 +65,31 @@ def set_crest_data(user, token, character_id):
     # marketPricesURL = extractURL(r, "marketPrices")  # for future use
     return
 
-def set_xmlapi_data(db, user, token, character_id):
+def check_update_type_group_ids(esi, db, type_id):
+    print "check_update_type_group_ids(%d)" % type_id
+
+    t = db(db.types.type_id == type_id).select().first()
+    if t:
+        group_id = t['group_id']
+        print "found group_id %s in cache" % group_id
+    else:
+        r = esi.Universe.get_universe_types_type_id(type_id=type_id).result()
+        db.types.insert(type_id=type_id, name=r['name'], description=r['description'], group_id=r['group_id'], icon_id=r['icon_id'], volume=r['volume'])
+        group_id = r['group_id']
+        print "added group_id %s to cache" % group_id
+
+    g = db(db.groups.group_id == group_id).select().first()
+    if g:
+        group_name = g['name']
+        print "found group_name %s in cache" % group_name
+    else:
+        r = esi.Universe.get_universe_groups_group_id(group_id=group_id).result()
+        db.groups.insert(group_id=group_id, name=r['name'])
+        group_name = r['name']
+        print "added group_name %s to cache" % group_name
+    return group_name
+
+def update_xmlapi_data(esi, db, user, token, character_id):
     r = requests.get(CHARACTER_INFO_URL % character_id)
     root = ET.fromstring(r.text)
 
@@ -67,7 +106,7 @@ def set_xmlapi_data(db, user, token, character_id):
     for row in root.findall("./result/rowset/row"):
         d = {}
         d['user_id'] = user.id
-        d['type_id'] = int(row.attrib['typeID'])
+        d['type_id'] = type_id = int(row.attrib['typeID'])
         d['client_type_id'] = row.attrib['clientTypeID']
         d['transaction_for'] = row.attrib['transactionFor']
         d['price'] = float(row.attrib['price'])
@@ -80,27 +119,29 @@ def set_xmlapi_data(db, user, token, character_id):
         d['transaction_date_time'] = row.attrib['transactionDateTime']
         d['client_name'] = row.attrib['clientName']
         d['transaction_type'] = row.attrib['transactionType']
-
         db.wallet.update_or_insert(db.wallet.transaction_id == d['transaction_id'], **d)
+        check_update_type_group_ids(esi, db, type_id)
     return
 
-def get_info(db, auth):
+def get_info(use_cache, db, auth):
     '''
     Get some EVE Online character information (currently public character data and
-    private wallet contents.
+    private wallet contents.  Must have been authenticated to EVE Online.
     '''
-    token = auth.settings.login_form.accessToken()
     character_id = auth.user.registration_id
-
-    if not token:
-        return None
-
     user = db(db.auth_user.registration_id == character_id).select().first()
+    user.birthday = user.birthday.strftime("%b %d, %Y at %H:%M:%S GMT")
 
-    set_swagger_data(user, token, character_id)
-    set_crest_data(user, token, character_id)
-    set_xmlapi_data(db, user, token, character_id)
+    if not use_cache:
+        token = auth.settings.login_form.accessToken()
+        esi = SwaggerClient.from_url(SWAGGER_URL)
 
-    wallet = db(db.wallet.user_id == user.id).select()
+        update_swagger_data(esi, db, user, token, character_id)
+        update_crest_data(user, token, character_id)
+        update_xmlapi_data(esi, db, user, token, character_id)
 
-    return user, wallet
+    # join each wallet transaction with matching types and groups entries...
+    transactions = db((db.wallet.user_id == auth.user.id) &
+                      (db.wallet.type_id == db.types.type_id) &
+                      (db.types.group_id == db.groups.group_id)).select()
+    return user, transactions

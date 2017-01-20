@@ -107,8 +107,9 @@ auth.settings.extra_fields['auth_user'] = [
 ]
 
 auth.define_tables(username=False, signature=False)
-db.auth_user.email.writable = False
-db.auth_user.email.readable = False
+db.auth_user.email.requires = None
+db.auth_user.last_name.requires = None
+db.auth_user.password.requires = None
 
 # -------------------------------------------------------------------------
 # configure email
