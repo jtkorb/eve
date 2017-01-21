@@ -8,9 +8,11 @@
 # - download is for downloading files uploaded in the db (does streaming)
 # -------------------------------------------------------------------------
 
-from datetime import datetime
 import eveuser
 import evesum
+
+from datetime import datetime
+import pytz
 
 def index():
     """
@@ -23,12 +25,15 @@ def index():
             eveuser.update_tables(db, character, auth.settings.login_form.accessToken())
             character = db(db.auth_user.id == auth.user.id).select().first()  # reload data (cached_until changed)
 
-        delta = datetime.now() - datetime.utcnow()  # for ad hoc timezone conversions
-        cached_until = (character.cached_until+delta).strftime("%H:%M:%S")
-        birthday = (character.birthday+delta).strftime("%b %d, %Y at %H:%M:%S")
+        # Convert cached_until and birthday in UTC to ET for display...
+        eastern = pytz.timezone('US/Eastern')
+        cached_until = character.cached_until.replace(tzinfo=pytz.utc).astimezone(eastern).strftime("%H:%M:%S")
+        birthday = character.birthday.replace(tzinfo=pytz.utc).astimezone(eastern).strftime("%b %d, %Y at %H:%M:%S")
         summary, transactions = evesum.analyze(db, auth.user.id)
     else:
         character, summary, transactions, birthday, cached_until = None, None, None, None, None
+
+    response.files.append(URL('static', 'css/blue/style.css'))
 
     return dict(character=character, summary=summary, transactions=transactions, birthday=birthday, cached_until=cached_until)
 

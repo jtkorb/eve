@@ -9,25 +9,19 @@ tr.ch, th.ch, td.ch {
     border-width: 0px;
     padding: 0px 15px 5px 0px;
     }
-table.summary {
+table.smry {
     border-width: 1px;
     border-style: solid;
     border-collapse: separate;
     padding: 3px;
     }
-tr.summary, th.summary, td.summary {
+tr.smry, th.smry, td.smry {
     border-width: 1px;
     border-style: solid;
     padding: 0px 5px 0px 5px;
     }
 td.number {
     text-align: right;
-    }
-th.right {
-    text-align: right;
-    }
-th.center {
-    text-align: center;
     }
 </style>
 
@@ -50,18 +44,22 @@ Log in to get information about your EVE Online character.
 
 {{if summary:}}
 <h3>Summary of Transactions</h3>
-<table class="summary">
-<tr class="summary">
-    <th class="summary">Item</th><th class="summary">Group</th><th class="summary">Currently<br/>Own</th>
-    <th class="summary">Quantity<br/>Bought</th><th class="summary">Total<br/>Paid</th><th class="summary">Average<br/>Cost</th>
-    <th class="summary">Quantity<br/>Sold</th><th class="summary">Total<br/>Received</th><th class="summary">Average<br/>Price</th>
+<table id="summaryTable" cellspacing="2" class="tablesorter smry">
+<thead>
+<tr>
+    <th class="smry">Item</th><th class="smry">Group</th><th class="smry">Currently<br/>Own</th>
+    <th class="smry">Quantity<br/>Bought</th><th class="smry">Total<br/>Paid</th><th class="smry">Average<br/>Cost</th>
+    <th class="smry">Quantity<br/>Sold</th><th class="smry">Total<br/>Received</th><th class="smry">Average<br/>Price</th>
 </tr>
+</thead>
+<tbody>
 {{for row in summary:}}
-    <tr class="summary"><td class="summary">{{=row[0]}}</td><td class="summary">{{=row[1]}}</td><td class="summary number">{{=row[2]}}</td>
-        <td class="summary number">{{=row[3]}}</td><td class="summary number">{{=row[4]}}</td><td class="summary number">{{=row[5]}}</td>
-        <td class="summary number">{{=row[6]}}</td><td class="summary number">{{=row[7]}}</td><td class="summary number">{{=row[8]}}</td>
+    <tr><td class="smry">{{=row[0]}}</td><td class="smry">{{=row[1]}}</td><td class="smry number">{{=row[2]}}</td>
+        <td class="smry number">{{=row[3]}}</td><td class="smry number">{{=row[4]}}</td><td class="smry number">{{=row[5]}}</td>
+        <td class="smry number">{{=row[6]}}</td><td class="smry number">{{=row[7]}}</td><td class="smry number">{{=row[8]}}</td>
     </tr>
     {{pass}}
+</tbody>
 </table>
 {{pass}}
 
@@ -81,3 +79,12 @@ Log in to get information about your EVE Online character.
 <br /><br /><br />
 {{=response.toolbar()}}
 {{pass}}
+
+<script src="{{=URL('static','js/jquery.tablesorter.js')}}"></script>
+<script type="text/javascript">
+$(document).ready(function()
+    {
+        $("#summaryTable").tablesorter();
+    }
+);
+</script>
