@@ -32,7 +32,7 @@
 
 db.define_table('assets',
                 Field('user_id', 'reference auth_user'),
-                Field('type_id', 'integer'),
+                Field('type_id', 'integer'),    # TODO Change to "reference types"?
                 Field('item_id', 'integer'),
                 Field('is_singleton', 'boolean'),
                 Field('location_flag'),
@@ -44,7 +44,7 @@ db.define_table('types',
                 Field('type_id', 'integer'),
                 Field('name'),
                 Field('description'),
-                Field('group_id', 'integer'),
+                Field('group_id', 'integer'),  # TODO Change to "reference groups"?
                 Field('icon_id', 'integer'),
                 Field('volume', 'float'))
 

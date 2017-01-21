@@ -2,13 +2,20 @@
 {{extend 'layout.html'}}
 
 <style>
-table {
+table.ch {
+    padding: 5px;
+    }
+tr.ch, th.ch, td.ch {
+    border-width: 0px;
+    padding: 0px 15px 5px 0px;
+    }
+table.summary {
     border-width: 1px;
     border-style: solid;
     border-collapse: separate;
     padding: 3px;
     }
-tr, th, td{
+tr.summary, th.summary, td.summary {
     border-width: 1px;
     border-style: solid;
     padding: 0px 5px 0px 5px;
@@ -24,35 +31,35 @@ th.center {
     }
 </style>
 
-<h2>{{=message}}</h2>
+<h2>{{=T('Welcome to the EVE Transaction Analyzer')}}</h2>
 
-{{if user:}}
-<table style="border-width: 0px;"><tr style="border-width: 0px">
-<td style="border-width: 0px">
-    {{=IMG(_src=user.portrait, _alt="Character Portrait")}}</td>
-<td style="border-width: 0px"><b>{{=user.first_name}} {{=user.last_name or ""}}
-    </b>({{=user.registration_id}})<br/>
-    {{=user.race}} {{=user.bloodline}} {{=user.ancestry}}<br/>
-    Born <i>{{=user.birthday}}</i></td>
-<td style="border-width: 0px">{{=IMG(_src=user.corp_logo, _alt="Corporate Logo")}}</td>
-<td style="border-width: 0px">Member <i>{{=user.corp_name}}</i></td>
+{{if character:}}
+<table class="ch"><tr class="ch">
+<td class="ch">{{=IMG(_src=character.portrait, _alt="Character Portrait")}}</td>
+<td class="ch"><b>{{=character.first_name}} {{=character.last_name or ""}}
+    </b>({{=character.registration_id}})<br/>
+    {{=character.race}} {{=character.bloodline}} {{=character.ancestry}}<br/>
+    Born {{=birthday}}</td>
+<td class="ch">{{=IMG(_src=character.corp_logo, _alt="Corporate Logo")}}</td>
+<td class="ch">Member <i>{{=character.corp_name}}</i></td>
 </tr></table>
+Data refreshes at {{=cached_until}}.
 {{else:}}
 Log in to get information about your EVE Online character.
 {{pass}}
 
 {{if summary:}}
 <h3>Summary of Transactions</h3>
-<table>
-<tr>
-    <th>Item</th><th>Group</th><th>Currently<br/>Own</th>
-    <th>Quantity<br/>Bought</th><th>Total<br/>Paid</th><th>Average<br/>Cost</th>
-    <th>Quantity<br/>Sold</th><th>Total<br/>Received</th><th>Average<br/>Price</th>
+<table class="summary">
+<tr class="summary">
+    <th class="summary">Item</th><th class="summary">Group</th><th class="summary">Currently<br/>Own</th>
+    <th class="summary">Quantity<br/>Bought</th><th class="summary">Total<br/>Paid</th><th class="summary">Average<br/>Cost</th>
+    <th class="summary">Quantity<br/>Sold</th><th class="summary">Total<br/>Received</th><th class="summary">Average<br/>Price</th>
 </tr>
 {{for row in summary:}}
-    <tr><td>{{=row[0]}}</td><td>{{=row[1]}}</td><td class="number">{{=row[2]}}</td>
-        <td class="number">{{=row[3]}}</td><td class="number">{{=row[4]}}</td><td class="number">{{=row[5]}}</td>
-        <td class="number">{{=row[6]}}</td><td class="number">{{=row[7]}}</td><td class="number">{{=row[8]}}</td>
+    <tr class="summary"><td class="summary">{{=row[0]}}</td><td class="summary">{{=row[1]}}</td><td class="summary number">{{=row[2]}}</td>
+        <td class="summary number">{{=row[3]}}</td><td class="summary number">{{=row[4]}}</td><td class="summary number">{{=row[5]}}</td>
+        <td class="summary number">{{=row[6]}}</td><td class="summary number">{{=row[7]}}</td><td class="summary number">{{=row[8]}}</td>
     </tr>
     {{pass}}
 </table>

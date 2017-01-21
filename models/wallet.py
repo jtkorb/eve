@@ -15,6 +15,8 @@
 # >>> for row in rows: print row.id, row.myfield
 # -------------------------------------------------------------------------
 
+# TODO Move to tables.py...?
+
 db.define_table('wallet',
                 Field('user_id', 'reference auth_user'),
                 Field('type_id', 'integer'),

@@ -1,12 +1,12 @@
 class Summary(object):
-    def __init__(self, name, group_name):
+    def __init__(self, name, group_name, quantity=0):
         self.name = name
+        self.group = group_name
+        self.quantity = quantity
         self.bought = 0
         self.sold = 0
         self.paid = 0
         self.recv = 0
-        self.group = group_name
-        self.quantity = 0
 
     def representation(self):
         return [
@@ -19,7 +19,7 @@ class Summary(object):
             "-" if self.sold == 0 else format(self.recv / self.sold, ",.2f")
         ]
 
-def do_summary(db, id, transactions):
+def analyze(db, id):
     '''For each 'type_name', accumulate data from transactions.'''
 
     # Each transaction looks like this:
@@ -34,13 +34,17 @@ def do_summary(db, id, transactions):
     #  'types': {'name': 'Mining Drone I', 'type_id': 10246L, 'icon_id': None, 'volume': 5.0, 'group_id': 101L,
     #            'id': 226L, 'description': 'Mining Drone'}} >
 
-    summary = {}
+    transactions = db((db.wallet.user_id == id) &
+                      (db.wallet.type_id == db.types.type_id) &
+                      (db.types.group_id == db.groups.group_id)).select()
+
+    by_type_name = {}
     by_type_id = {}
     for row in transactions:
-        if row.wallet.type_name not in summary:
-            summary[row.wallet.type_name] = Summary(row.wallet.type_name, row.groups.name)
-            by_type_id[row.wallet.type_id] = summary[row.wallet.type_name]
-        item = summary[row.wallet.type_name]
+        if row.wallet.type_name not in by_type_name:
+            by_type_name[row.wallet.type_name] = Summary(row.wallet.type_name, row.groups.name)
+            by_type_id[row.wallet.type_id] = by_type_name[row.wallet.type_name]
+        item = by_type_name[row.wallet.type_name]
         if row.wallet.transaction_type == "sell":
             item.sold += row.wallet.quantity
             item.recv += row.wallet.quantity * row.wallet.price
@@ -56,12 +60,15 @@ def do_summary(db, id, transactions):
             by_type_id[type_id].quantity += quantity
         else:
             t = db(db.types.type_id == type_id).select().first()
-            g = db(db.groups.group_id == t.group_id).select().first()
-            by_type_id[type_id] = summary[t.name] = Summary(t.name, g.name)
-            summary[t.name].quantity = quantity
+            g = db(db.groups.group_id == t.group_id).select().first() if t else None
+            if g:
+                by_type_id[type_id] = by_type_name[t.name] = Summary(t.name, g.name, quantity=quantity)
+            else:
+                print "types or group entry missing for type_id %d)" % type_id
+                type_name = "(missing entry for type_id = %d)" % type_id
+                by_type_id[type_id] = by_type_name[type_name] = Summary(type_name, "---unknown---", quantity=quantity)
 
-    a = []
-    for key in sorted(summary.iterkeys()):
-        s = summary[key]
-        a.append(s.representation())
-    return a
+    summary = []
+    for key in sorted(by_type_name.iterkeys()):
+        summary.append(by_type_name[key].representation())
+    return summary, transactions

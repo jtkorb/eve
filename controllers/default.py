@@ -17,14 +17,20 @@ def index():
     Landing page for EVE Online users.
     """
     if auth.is_logged_in():
-        cached_until = db(db.auth_user.id == auth.user.id).select().first().cached_until  # get up-to-date auth data
-        use_cache = cached_until != None and datetime.utcnow() > cached_until
-        user, transactions = eveuser.get_info(use_cache, db, auth)
-        summary = evesum.do_summary(db, auth.user.id, transactions)
-    else:
-        user, transactions, summary = None, None, None
+        character = db(db.auth_user.id == auth.user.id).select().first()  # get up-to-date auth data
 
-    return dict(message=T('Welcome to the EVE Transaction Analyzer'), user=user, transactions=transactions, summary=summary)
+        if character.cached_until == None or datetime.utcnow() > character.cached_until:
+            eveuser.update_tables(db, character, auth.settings.login_form.accessToken())
+            character = db(db.auth_user.id == auth.user.id).select().first()  # reload data (cached_until changed)
+
+        delta = datetime.now() - datetime.utcnow()  # for ad hoc timezone conversions
+        cached_until = (character.cached_until+delta).strftime("%H:%M:%S")
+        birthday = (character.birthday+delta).strftime("%b %d, %Y at %H:%M:%S")
+        summary, transactions = evesum.analyze(db, auth.user.id)
+    else:
+        character, summary, transactions, birthday, cached_until = None, None, None, None, None
+
+    return dict(character=character, summary=summary, transactions=transactions, birthday=birthday, cached_until=cached_until)
 
 @auth.requires_login()
 def raw():

@@ -1,7 +1,6 @@
 from bravado.client import SwaggerClient
 import requests
 import xml.etree.ElementTree as ET
-from datetime import datetime
 
 USER_AGENT = "EVE Transaction Analyzer 0.1, Tim Korb <jtkorb@bikmort.com>"
 SWAGGER_URL = "https://esi.tech.ccp.is/latest/swagger.json"
@@ -123,26 +122,15 @@ def update_xmlapi_data(esi, db, user, token, character_id):
         check_update_type_group_ids(esi, db, type_id)
     return
 
-def get_info(use_cache, db, auth):
+def update_tables(db, character, token):
     '''
     Get some EVE Online character information (currently public character data and
     private wallet contents.  Must have been authenticated to EVE Online.
     '''
-    character_id = auth.user.registration_id
-    user = db(db.auth_user.registration_id == character_id).select().first()
+    esi = SwaggerClient.from_url(SWAGGER_URL)
 
-    if not use_cache:
-        token = auth.settings.login_form.accessToken()
-        esi = SwaggerClient.from_url(SWAGGER_URL)
-
-        update_swagger_data(esi, db, user, token, character_id)
-        update_crest_data(user, token, character_id)
-        update_xmlapi_data(esi, db, user, token, character_id)
-
-    user.birthday = user.birthday.strftime("%b %d, %Y at %H:%M:%S GMT")
-
-    # join each wallet transaction with matching types and groups entries...
-    transactions = db((db.wallet.user_id == auth.user.id) &
-                      (db.wallet.type_id == db.types.type_id) &
-                      (db.types.group_id == db.groups.group_id)).select()
-    return user, transactions
+    character_id = character.registration_id
+    update_swagger_data(esi, db, character, token, character_id)
+    update_crest_data(character, token, character_id)
+    update_xmlapi_data(esi, db, character, token, character_id)
+    return
