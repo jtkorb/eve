@@ -1,4 +1,4 @@
-{{left_sidebar_enabled, right_sidebar_enabled = True, False}}
+{{left_sidebar_enabled, right_sidebar_enabled = False, False}}
 {{extend 'layout.html'}}
 
 <style>
@@ -26,7 +26,18 @@ th.center {
 
 <h2>{{=message}}</h2>
 
-{{if not user:}}
+{{if user:}}
+<table style="border-width: 0px;"><tr style="border-width: 0px">
+<td style="border-width: 0px">
+    {{=IMG(_src=user.portrait, _alt="Character Portrait")}}</td>
+<td style="border-width: 0px"><b>{{=user.first_name}} {{=user.last_name or ""}}
+    </b>({{=user.registration_id}})<br/>
+    {{=user.race}} {{=user.bloodline}} {{=user.ancestry}}<br/>
+    Born <i>{{=user.birthday}}</i></td>
+<td style="border-width: 0px">{{=IMG(_src=user.corp_logo, _alt="Corporate Logo")}}</td>
+<td style="border-width: 0px">Member <i>{{=user.corp_name}}</i></td>
+</tr></table>
+{{else:}}
 Log in to get information about your EVE Online character.
 {{pass}}
 
@@ -47,24 +58,13 @@ Log in to get information about your EVE Online character.
 </table>
 {{pass}}
 
-{{if transactions:}}
+<!--Next line was testing the variable transactions...-->
+{{if None:}}
 <h3>Your Transactions</h3>
 {{=BEAUTIFY(transactions)}}
 {{pass}}
 
 {{block left_sidebar}}
-{{if user:}}
-<p>
-{{=IMG(_src=user.portrait, _alt="Character Portrait")}}<br/>
-<b>{{=user.first_name}} {{=user.last_name or ""}}</b> ({{=user.registration_id}})<br/>
-{{=user.race}} {{=user.bloodline}} {{=user.ancestry}}<br/>
-Born <i>{{=user.birthday}}</i>
-</p>
-<p>
-{{=IMG(_src=user.corp_logo, _alt="Corporate Logo")}}<br/>
-Member <i>{{=user.corp_name}}</i>
-</p>
-{{pass}}
 {{end}}
 
 {{block right_sidebar}}

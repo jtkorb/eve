@@ -28,7 +28,7 @@ def update_swagger_data(esi, db, user, token, character_id):
         _request_options={"headers" : { "Authorization" : "Bearer " + token}}).result()
 
     print "assets retrieved: %d" % len(r)
-    db.assets.truncate()
+    db(db.assets.user_id == user.id).delete()
     for item in r:
         d = {}
         d['user_id'] = user.id
@@ -130,7 +130,6 @@ def get_info(use_cache, db, auth):
     '''
     character_id = auth.user.registration_id
     user = db(db.auth_user.registration_id == character_id).select().first()
-    user.birthday = user.birthday.strftime("%b %d, %Y at %H:%M:%S GMT")
 
     if not use_cache:
         token = auth.settings.login_form.accessToken()
@@ -139,6 +138,8 @@ def get_info(use_cache, db, auth):
         update_swagger_data(esi, db, user, token, character_id)
         update_crest_data(user, token, character_id)
         update_xmlapi_data(esi, db, user, token, character_id)
+
+    user.birthday = user.birthday.strftime("%b %d, %Y at %H:%M:%S GMT")
 
     # join each wallet transaction with matching types and groups entries...
     transactions = db((db.wallet.user_id == auth.user.id) &
