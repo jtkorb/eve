@@ -27,8 +27,8 @@ def index():
 
         # Convert cached_until and birthday in UTC to ET for display...
         eastern = pytz.timezone('US/Eastern')
-        cached_until = character.cached_until.replace(tzinfo=pytz.utc).astimezone(eastern).strftime("%H:%M:%S")
-        birthday = character.birthday.replace(tzinfo=pytz.utc).astimezone(eastern).strftime("%b %d, %Y at %H:%M:%S")
+        cached_until = character.cached_until.replace(tzinfo=pytz.utc).astimezone(eastern).strftime("%H:%M:%S %Z")
+        birthday = character.birthday.replace(tzinfo=pytz.utc).astimezone(eastern).strftime("%b %d, %Y at %H:%M:%S %Z")
         summary, transactions = evesum.analyze(db, auth.user.id)
     else:
         character, summary, transactions, birthday, cached_until = None, None, None, None, None
