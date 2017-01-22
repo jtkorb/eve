@@ -26,7 +26,6 @@ def update_swagger_data(esi, db, user, token, character_id):
         character_id=character_id,
         _request_options={"headers" : { "Authorization" : "Bearer " + token}}).result()
 
-    print "assets retrieved: %d" % len(r)
     db(db.assets.user_id == user.id).delete()
     for item in r:
         d = {}

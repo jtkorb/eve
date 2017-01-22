@@ -1,6 +1,5 @@
 {{left_sidebar_enabled, right_sidebar_enabled = False, False}}
 {{include 'default/style.html'}}
-{{response.files.append(URL('static','css/blue/style.css'))}}
 {{extend 'layout.html'}}
 
 <h2>{{=T('Welcome to the EVE Transaction Analyzer')}}</h2>
@@ -12,11 +11,12 @@
 {{=response.toolbar()}}
 {{pass}}
 
-<script src="{{=URL('static','js/jquery.tablesorter.js')}}"></script>
+<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.13/css/jquery.dataTables.css">
+<script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.13/js/jquery.dataTables.js"></script>
 <script type="text/javascript">
 $(document).ready(function()
     {
-        $("#summaryTable").tablesorter( {sortList: [[0,0]]});
+        $("#summaryTable").DataTable({paging: false});
     }
 );
 </script>
