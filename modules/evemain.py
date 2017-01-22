@@ -5,7 +5,6 @@ from gluon.html import *
 
 def main(auth, db, args, response):
     if auth.is_logged_in():
-        response.files.append(URL('static', 'css/blue/style.css'))
         char_row = db(db.auth_user.id == auth.user.id).select().first()  # get up-to-date auth data
 
         if char_row.cached_until == None or datetime.utcnow() > char_row.cached_until:
@@ -32,7 +31,7 @@ class Character(object):
             TD(IMG(_src=self.character.portrait, _alt="Character Portrait"), _class="char"),
             TD(self.character.first_name, " ", self.character.last_name, BR(),
                self.character.registration_id, BR(), self.character.race, " ", self.character.bloodline, " ",
-               self.character.ancestry, BR(), "Born ", self.character.birthday, _class="char"),
+               self.character.ancestry, BR(), "Born ", self.birthday, _class="char"),
             TD(IMG(_src=self.character.corp_logo, _alt="Corporate Logo"), _class="char"),
             TD("Member ", I(self.character.corp_name))))),
             P("Data refreshes at ", self.cached_until))
