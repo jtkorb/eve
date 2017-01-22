@@ -1,7 +1,7 @@
 from datetime import datetime
 import pytz
 import eveuser
-from html import *
+from gluon.html import *
 
 def main(auth, db, args, response):
     if auth.is_logged_in():
