@@ -119,7 +119,7 @@ def update_xmlapi_data(esi, db, user, token, character_id):
 def update_tables(db, character, token):
     '''
     Get some EVE Online character information (currently public character data and
-    private wallet contents.  Must have been authenticated to EVE Online.
+    private wallet contents).  Must have been authenticated to EVE Online.
     '''
     esi = SwaggerClient.from_url(SWAGGER_URL)
 

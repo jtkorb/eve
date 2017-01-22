@@ -5,22 +5,17 @@ from html import *
 
 def main(auth, db, args, response):
     if auth.is_logged_in():
+        response.files.append(URL('static', 'css/blue/style.css'))
         char_row = db(db.auth_user.id == auth.user.id).select().first()  # get up-to-date auth data
 
         if char_row.cached_until == None or datetime.utcnow() > char_row.cached_until:
             eveuser.update_tables(db, char_row, auth.settings.login_form.accessToken())
             char_row = db(db.auth_user.id == auth.user.id).select().first()  # reload data (cached_until changed)
 
-        # Convert cached_until and birthday in UTC to ET for display...
-        eastern = pytz.timezone('US/Eastern')
-        cached_until = char_row.cached_until.replace(tzinfo=pytz.utc).astimezone(eastern).strftime("%H:%M:%S %Z")
-        birthday = char_row.birthday.replace(tzinfo=pytz.utc).astimezone(eastern).strftime("%b %d, %Y at %H:%M:%S %Z")
-        summary, transactions = analyze(db, auth.user.id, args)
+        summary = analyze(db, auth.user.id, args)
         character = Character(char_row).xml()
     else:
-        character, summary, transactions, birthday, cached_until = None, None, None, None, None
-
-    response.files.append(URL('static', 'css/blue/style.css'))
+        character, summary = None, None
 
     return dict(character=character, summary=summary)
 
@@ -87,7 +82,7 @@ class Summary(object):
         if not group:
             row.append(TD(self.group, _class="smry"))
         row.append(CAT(
-            TD(format(self.quantity, ",d"), _class="smry"),
+            TD(format(self.quantity, ",d"), _class="smry num"),
             TD(format(self.bought, ",d") if self.bought > 0 else "-", _class="smry num"),
             TD(format(self.paid, ",.2f") if self.paid > 0.0 else "-", _class="smry num"),
             TD("-" if self.bought == 0 else format(self.paid / self.bought, ",.2f"), _class="smry num"),
@@ -154,4 +149,4 @@ def analyze(db, id, args):
                 type_name = "(missing entry for type_id = %d)" % type_id
                 by_type_id[type_id] = by_type_name[type_name] = Summary(type_name, "---unknown---", quantity=quantity)
 
-    return Summary.make_table(args), transactions
+    return Summary.make_table(args)

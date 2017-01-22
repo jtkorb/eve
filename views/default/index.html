@@ -1,79 +1,11 @@
 {{left_sidebar_enabled, right_sidebar_enabled = False, False}}
+{{include 'default/style.html'}}
+{{response.files.append(URL('static','css/blue/style.css'))}}
 {{extend 'layout.html'}}
 
-<style>
-table.ch {
-    padding: 5px;
-    }
-tr.ch, th.ch, td.ch {
-    border-width: 0px;
-    padding: 0px 15px 5px 0px;
-    }
-table.smry {
-    border-width: 1px;
-    border-style: solid;
-    border-collapse: separate;
-    padding: 3px;
-    }
-tr.smry, th.smry, td.smry {
-    border-width: 1px;
-    border-style: solid;
-    padding: 0px 5px 0px 5px;
-    }
-td.number {
-    text-align: right;
-    }
-</style>
-
 <h2>{{=T('Welcome to the EVE Transaction Analyzer')}}</h2>
-
-{{if character:}}
-<table class="ch"><tr class="ch">
-<td class="ch">{{=IMG(_src=character.portrait, _alt="Character Portrait")}}</td>
-<td class="ch"><b>{{=character.first_name}} {{=character.last_name or ""}}
-    </b>({{=character.registration_id}})<br/>
-    {{=character.race}} {{=character.bloodline}} {{=character.ancestry}}<br/>
-    Born {{=birthday}}</td>
-<td class="ch">{{=IMG(_src=character.corp_logo, _alt="Corporate Logo")}}</td>
-<td class="ch">Member <i>{{=character.corp_name}}</i></td>
-</tr></table>
-Data refreshes at {{=cached_until}}.
-{{else:}}
-Log in to get information about your EVE Online character.
-{{pass}}
-
-{{if summary:}}
-<h3>Current Assets and Summary of Transactions</h3>
-<table id="summaryTable" cellspacing="2" class="tablesorter smry">
-<thead>
-<tr>
-    <th class="smry">Item</th><th class="smry">Group</th><th class="smry">Currently<br/>Own</th>
-    <th class="smry">Quantity<br/>Bought</th><th class="smry">Total<br/>Paid</th><th class="smry">Average<br/>Cost</th>
-    <th class="smry">Quantity<br/>Sold</th><th class="smry">Total<br/>Received</th><th class="smry">Average<br/>Price</th>
-</tr>
-</thead>
-<tbody>
-{{for row in summary:}}
-    <tr><td class="smry">{{=row[0]}}</td><td class="smry">{{=row[1]}}</td><td class="smry number">{{=row[2]}}</td>
-        <td class="smry number">{{=row[3]}}</td><td class="smry number">{{=row[4]}}</td><td class="smry number">{{=row[5]}}</td>
-        <td class="smry number">{{=row[6]}}</td><td class="smry number">{{=row[7]}}</td><td class="smry number">{{=row[8]}}</td>
-    </tr>
-    {{pass}}
-</tbody>
-</table>
-{{pass}}
-
-<!--Next line was testing the variable transactions...-->
-{{if None:}}
-<h3>Your Transactions</h3>
-{{=BEAUTIFY(transactions)}}
-{{pass}}
-
-{{block left_sidebar}}
-{{end}}
-
-{{block right_sidebar}}
-{{end}}
+{{=character}}
+{{=summary}}
 
 {{if request.is_local:}}
 <br /><br /><br />
@@ -84,7 +16,7 @@ Log in to get information about your EVE Online character.
 <script type="text/javascript">
 $(document).ready(function()
     {
-        $("#summaryTable").tablesorter();
+        $("#summaryTable").tablesorter( {sortList: [[0,0]]});
     }
 );
 </script>

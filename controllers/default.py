@@ -8,61 +8,10 @@
 # - download is for downloading files uploaded in the db (does streaming)
 # -------------------------------------------------------------------------
 
-import eveuser
-import evesum
 import evemain
 
-from datetime import datetime
-import pytz
-
-def new():
-    return evemain.main(auth, db, request.args, response)
-
 def index():
-    """
-    Landing page for EVE Online users.
-    """
-    if auth.is_logged_in():
-        character = db(db.auth_user.id == auth.user.id).select().first()  # get up-to-date auth data
-
-        if character.cached_until == None or datetime.utcnow() > character.cached_until:
-            eveuser.update_tables(db, character, auth.settings.login_form.accessToken())
-            character = db(db.auth_user.id == auth.user.id).select().first()  # reload data (cached_until changed)
-
-        # Convert cached_until and birthday in UTC to ET for display...
-        eastern = pytz.timezone('US/Eastern')
-        cached_until = character.cached_until.replace(tzinfo=pytz.utc).astimezone(eastern).strftime("%H:%M:%S %Z")
-        birthday = character.birthday.replace(tzinfo=pytz.utc).astimezone(eastern).strftime("%b %d, %Y at %H:%M:%S %Z")
-        summary, transactions = evesum.analyze(db, auth.user.id)
-    else:
-        character, summary, transactions, birthday, cached_until = None, None, None, None, None
-
-    response.files.append(URL('static', 'css/blue/style.css'))
-
-    return dict(character=character, summary=summary, transactions=transactions, birthday=birthday, cached_until=cached_until)
-
-def minerals():
-    """
-    Mineral page for EVE Online users.
-    """
-    if auth.is_logged_in():
-        character = db(db.auth_user.id == auth.user.id).select().first()  # get up-to-date auth data
-
-        if character.cached_until == None or datetime.utcnow() > character.cached_until:
-            eveuser.update_tables(db, character, auth.settings.login_form.accessToken())
-            character = db(db.auth_user.id == auth.user.id).select().first()  # reload data (cached_until changed)
-
-        # Convert cached_until and birthday in UTC to ET for display...
-        eastern = pytz.timezone('US/Eastern')
-        cached_until = character.cached_until.replace(tzinfo=pytz.utc).astimezone(eastern).strftime("%H:%M:%S %Z")
-        birthday = character.birthday.replace(tzinfo=pytz.utc).astimezone(eastern).strftime("%b %d, %Y at %H:%M:%S %Z")
-        summary, transactions = evesum.analyze(db, auth.user.id)
-    else:
-        character, summary, transactions, birthday, cached_until = None, None, None, None, None
-
-    response.files.append(URL('static', 'css/blue/style.css'))
-
-    return dict(character=character, summary=summary, transactions=transactions, birthday=birthday, cached_until=cached_until)
+    return evemain.main(auth, db, request.args, response)
 
 @auth.requires_login()
 def raw():
