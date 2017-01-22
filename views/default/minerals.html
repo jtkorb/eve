@@ -43,22 +43,24 @@ Log in to get information about your EVE Online character.
 {{pass}}
 
 {{if summary:}}
-<h3>Current Assets and Summary of Transactions</h3>
+<h3>Minerals</h3>
 <table id="summaryTable" cellspacing="2" class="tablesorter smry">
 <thead>
 <tr>
-    <th class="smry">Item</th><th class="smry">Group</th><th class="smry">Currently<br/>Own</th>
+    <th class="smry">Item</th><th class="smry">Currently<br/>Own</th>
     <th class="smry">Quantity<br/>Bought</th><th class="smry">Total<br/>Paid</th><th class="smry">Average<br/>Cost</th>
     <th class="smry">Quantity<br/>Sold</th><th class="smry">Total<br/>Received</th><th class="smry">Average<br/>Price</th>
 </tr>
 </thead>
 <tbody>
 {{for row in summary:}}
-    <tr><td class="smry">{{=row[0]}}</td><td class="smry">{{=row[1]}}</td><td class="smry number">{{=row[2]}}</td>
+{{if row[1] == "Mineral":}}
+    <tr><td class="smry">{{=row[0]}}</td></td><td class="smry number">{{=row[2]}}</td>
         <td class="smry number">{{=row[3]}}</td><td class="smry number">{{=row[4]}}</td><td class="smry number">{{=row[5]}}</td>
         <td class="smry number">{{=row[6]}}</td><td class="smry number">{{=row[7]}}</td><td class="smry number">{{=row[8]}}</td>
     </tr>
     {{pass}}
+{{pass}}
 </tbody>
 </table>
 {{pass}}

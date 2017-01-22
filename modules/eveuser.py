@@ -65,27 +65,21 @@ def update_crest_data(user, token, character_id):
     return
 
 def check_update_type_group_ids(esi, db, type_id):
-    print "check_update_type_group_ids(%d)" % type_id
-
     t = db(db.types.type_id == type_id).select().first()
     if t:
         group_id = t['group_id']
-        print "found group_id %s in cache" % group_id
     else:
         r = esi.Universe.get_universe_types_type_id(type_id=type_id).result()
         db.types.insert(type_id=type_id, name=r['name'], description=r['description'], group_id=r['group_id'], icon_id=r['icon_id'], volume=r['volume'])
         group_id = r['group_id']
-        print "added group_id %s to cache" % group_id
 
     g = db(db.groups.group_id == group_id).select().first()
     if g:
         group_name = g['name']
-        print "found group_name %s in cache" % group_name
     else:
         r = esi.Universe.get_universe_groups_group_id(group_id=group_id).result()
         db.groups.insert(group_id=group_id, name=r['name'])
         group_name = r['name']
-        print "added group_name %s to cache" % group_name
     return group_name
 
 def update_xmlapi_data(esi, db, user, token, character_id):
