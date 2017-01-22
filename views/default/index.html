@@ -3,8 +3,12 @@
 {{extend 'layout.html'}}
 
 <h2>{{=T('Welcome to the EVE Transaction Analyzer')}}</h2>
+{{if character and summary:}}
 {{=character}}
 {{=summary}}
+{{else:}}
+<p>Log in to get information about your EVE Online character.</p>
+{{pass}}
 
 {{if request.is_local:}}
 <br /><br /><br />
