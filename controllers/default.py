@@ -10,9 +10,13 @@
 
 import eveuser
 import evesum
+import evemain
 
 from datetime import datetime
 import pytz
+
+def new():
+    return evemain.main(auth, db, request.args, response)
 
 def index():
     """
