@@ -11,7 +11,7 @@
 import evemain
 
 def index():
-    return evemain.main(auth, db, request.args, response)
+    return evemain.main(auth, db, request.args)
 
 @auth.requires_login()
 def raw():

@@ -3,7 +3,7 @@ import pytz
 import eveuser
 from gluon.html import *
 
-def main(auth, db, args, response):
+def main(auth, db, args):
     if auth.is_logged_in():
         char_row = db(db.auth_user.id == auth.user.id).select().first()  # get up-to-date auth data
 
@@ -11,30 +11,28 @@ def main(auth, db, args, response):
             eveuser.update_tables(db, char_row, auth.settings.login_form.accessToken())
             char_row = db(db.auth_user.id == auth.user.id).select().first()  # reload data (cached_until changed)
 
-        summary = analyze(db, auth.user.id, args)
-        character = Character(char_row).xml()
+        summary = create_summary(db, auth.user.id, args)
+        character = format_character(char_row)
     else:
         character, summary = None, None
 
     return dict(character=character, summary=summary)
 
-class Character(object):
-    def __init__(self, character):
-        self.character = character
-        # Convert cached_until and birthday in UTC to ET for display...
-        eastern = pytz.timezone('US/Eastern')
-        self.cached_until = character.cached_until.replace(tzinfo=pytz.utc).astimezone(eastern).strftime("%H:%M:%S %Z")
-        self.birthday = character.birthday.replace(tzinfo=pytz.utc).astimezone(eastern).strftime("%b %d, %Y at %H:%M:%S %Z")
+def format_character(char_row):
+    # Convert cached_until and birthday in UTC to ET for display...
+    eastern = pytz.timezone('US/Eastern')
+    cached_until = char_row.cached_until.replace(tzinfo=pytz.utc).astimezone(eastern).strftime("%H:%M:%S %Z")
+    birthday = char_row.birthday.replace(tzinfo=pytz.utc).astimezone(eastern).strftime("%b %d, %Y at %H:%M:%S %Z")
 
-    def xml(self):
-        return DIV(TABLE(THEAD(TR(
-            TD(IMG(_src=self.character.portrait, _alt="Character Portrait"), _class="char"),
-            TD(self.character.first_name, " ", self.character.last_name, BR(),
-               self.character.registration_id, BR(), self.character.race, " ", self.character.bloodline, " ",
-               self.character.ancestry, BR(), "Born ", self.birthday, _class="char"),
-            TD(IMG(_src=self.character.corp_logo, _alt="Corporate Logo"), _class="char"),
-            TD("Member ", I(self.character.corp_name))))),
-            P("Data refreshes at ", self.cached_until))
+    return DIV(
+        TABLE(THEAD(TR(
+            TD(IMG(_src=char_row.portrait, _alt="Character Portrait"), _style="padding: 0px 15px 5px 0px;"),
+            TD(char_row.first_name, " ", char_row.last_name, BR(),
+                char_row.registration_id, BR(), char_row.race, " ", char_row.bloodline, " ",
+                char_row.ancestry, BR(), "Born ", birthday, _style="padding: 0px 15px 5px 0px;"),
+            TD(IMG(_src=char_row.corp_logo, _alt="Corporate Logo"), _style="padding: 0px 15px 5px 0px;"),
+            TD("Member ", I(char_row.corp_name))))),
+        P("Data refreshes at ", cached_until))
 
 class Summary(object):
     rows = []
@@ -56,9 +54,9 @@ class Summary(object):
         row.append(TH("Name"))
         if not group:
             row.append(TH("Group"))
-        row.append(CAT(TH("Currently Own"),
-            TH("Quantity Bought"), TH("Total Paid"), TH("Average Cost"),
-            TH("Quantity Sold"), TH("Total Received"), TH("Average Price")))
+        row.append(CAT(TH("Currently Own", _class="num"),
+            TH("Quantity Bought", _class="num"), TH("Total Paid", _class="num"), TH("Average Cost", _class="num"),
+            TH("Quantity Sold", _class="num"), TH("Total Received", _class="num"), TH("Average Price", _class="num")))
         head = THEAD(row)
         body = TBODY()
         for row in Summary.rows:
@@ -67,7 +65,7 @@ class Summary(object):
                     body.append(row.make_row(group))
             else:
                 body.append(row.make_row())
-        t = TABLE(head, body, _id="summaryTable", _class="tablesorter smry")
+        t = TABLE(head, body, _id="summaryTable", _class="display compact cell-border", _cell_spacing="0")
         if group:
             t = DIV(H3("Group by: ", group), t)
         else:
@@ -77,20 +75,20 @@ class Summary(object):
 
     def make_row(self, group=None):
         row = TR()
-        row.append(TD(self.name, _class="smry"))
+        row.append(TD(self.name))
         if not group:
-            row.append(TD(self.group, _class="smry"))
+            row.append(TD(self.group))
         row.append(CAT(
-            TD(format(self.quantity, ",d"), _class="smry num"),
-            TD(format(self.bought, ",d") if self.bought > 0 else "-", _class="smry num"),
-            TD(format(self.paid, ",.2f") if self.paid > 0.0 else "-", _class="smry num"),
-            TD("-" if self.bought == 0 else format(self.paid / self.bought, ",.2f"), _class="smry num"),
-            TD(format(self.sold, ",d") if self.sold > 0 else "-", _class="smry num"),
-            TD(format(self.recv, ",.2f") if self.recv > 0.0 else "-", _class="smry num"),
-            TD("-" if self.sold == 0 else format(self.recv / self.sold, ",.2f"), _class="smry num")))
+            TD(format(self.quantity, ",d")),
+            TD(format(self.bought, ",d") if self.bought > 0 else "-"),
+            TD(format(self.paid, ",.2f") if self.paid > 0.0 else "-"),
+            TD("-" if self.bought == 0 else format(self.paid / self.bought, ",.2f")),
+            TD(format(self.sold, ",d") if self.sold > 0 else "-"),
+            TD(format(self.recv, ",.2f") if self.recv > 0.0 else "-"),
+            TD("-" if self.sold == 0 else format(self.recv / self.sold, ",.2f"))))
         return row
 
-def analyze(db, id, args):
+def create_summary(db, id, args):
     '''For each 'type_name', accumulate data from transactions.'''
 
     transactions = db((db.wallet.user_id == id) &
@@ -131,7 +129,7 @@ def analyze(db, id, args):
             item.bought += row.wallet.quantity
             item.paid += row.wallet.quantity * row.wallet.price
 
-    # Build a Summary entry per type_name in the Assets...
+    # Add Asset quantities to Summary objects (adding new Summary objects as necessary)...
     r = db(db.assets.user_id == id).select(db.assets.type_id, db.assets.quantity.sum(), groupby=db.assets.type_id)
     for row in r:
         type_id = row.assets.type_id

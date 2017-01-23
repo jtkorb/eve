@@ -1,5 +1,4 @@
 {{left_sidebar_enabled, right_sidebar_enabled = False, False}}
-{{include 'default/style.html'}}
 {{extend 'layout.html'}}
 
 <h2>{{=T('Welcome to the EVE Transaction Analyzer')}}</h2>
@@ -20,7 +19,11 @@
 <script type="text/javascript">
 $(document).ready(function()
     {
-        $("#summaryTable").DataTable({paging: false});
+        $("#summaryTable").DataTable({
+            paging: false,
+            scrollY: "400px",
+            columnDefs: [ { targets: "num", className: "dt-head-center dt-body-right" } ]
+            });
     }
 );
 </script>
