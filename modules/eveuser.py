@@ -36,7 +36,7 @@ def update_swagger_data(esi, db, user, token, character_id):
         d['location_flag'] = item['location_flag']
         d['location_id'] = item['location_id']
         d['location_type'] = item['location_type']
-        d['quantity'] = item['quantity']
+        d['quantity'] = max(1, d['quantity'])  # None or < 0 indicates a singleton item, but still 1
         db.assets.insert(**d)
         check_update_type_group_ids(esi, db, type_id)
     return
