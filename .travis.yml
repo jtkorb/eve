@@ -1,15 +1,13 @@
 language: python
 
-cache: pip
-
 python:
   - '2.7'
   - 'pypy'
 
 install:
-  - pip install -e .
-
-before_script:
+  - pip install --user -r requirements.txt
+  - git clone https://github.com/web2py/web2py.git
+  - cd web2py/applications; ln -s ../../. eve
 
 script:
   - ./web2py.py --test eve/test
