@@ -8,7 +8,7 @@ cache: pip
 install:
   - pip install -r requirements.txt
   - git clone --recurse-submodules https://github.com/web2py/web2py.git
-  - cd web2py/applications; ln -s ../../. eve; cd ..
+  - cd web2py; touch welcome.w2p; cd applications; ln -s ../../. eve; mkdir eve/databases; cd ..
 
 script: ./web2py.py --test eve/test
 
