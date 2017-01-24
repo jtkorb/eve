@@ -1,0 +1,18 @@
+language: python
+
+cache: pip
+
+python:
+  - '2.7'
+  - 'pypy'
+
+install:
+  - pip install -e .
+
+before_script:
+
+script:
+  - ./web2py.py --test eve/test
+
+notifications:
+  email: true
