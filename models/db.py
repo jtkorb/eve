@@ -27,7 +27,7 @@ try:
 except:
     import os
     configfile = os.path.join(request.folder, 'private', 'appconfig_dist.ini')
-    myconf = AppConfig(configfile="appconfig_dist.ini")
+    myconf = AppConfig(configfile=configfile)
 
 if not request.env.web2py_runtime_gae:
     # ---------------------------------------------------------------------
