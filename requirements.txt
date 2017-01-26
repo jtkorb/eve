@@ -1,0 +1,4 @@
+requests
+bravado
+functools32
+pytz

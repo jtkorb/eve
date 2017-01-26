@@ -22,7 +22,10 @@ from gluon.contrib.appconfig import AppConfig
 # -------------------------------------------------------------------------
 # once in production, remove reload=True to gain full speed
 # -------------------------------------------------------------------------
-myconf = AppConfig(reload=True)
+try:
+    myconf = AppConfig(reload=True)
+except:
+    myconf = AppConfig(appconfigfile="appconfig_dist.ini")
 
 if not request.env.web2py_runtime_gae:
     # ---------------------------------------------------------------------
