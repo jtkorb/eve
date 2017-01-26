@@ -27,8 +27,8 @@ def format_character(char_row):
     return DIV(
         TABLE(THEAD(TR(
             TD(IMG(_src=char_row.portrait, _alt="Character Portrait"), _style="padding: 0px 15px 5px 0px;"),
-            TD(char_row.first_name, " ", char_row.last_name, BR(),
-                char_row.registration_id, BR(), char_row.race, " ", char_row.bloodline, " ",
+            TD(B(char_row.first_name, " ", char_row.last_name), "(", char_row.registration_id, ")", BR(),
+                char_row.race, " ", char_row.bloodline, " ",
                 char_row.ancestry, BR(), "Born ", birthday, _style="padding: 0px 15px 5px 0px;"),
             TD(IMG(_src=char_row.corp_logo, _alt="Corporate Logo"), _style="padding: 0px 15px 5px 0px;"),
             TD("Member ", I(char_row.corp_name))))),

@@ -25,7 +25,9 @@ from gluon.contrib.appconfig import AppConfig
 try:
     myconf = AppConfig(reload=True)
 except:
-    myconf = AppConfig(appconfigfile="appconfig_dist.ini")
+    import os
+    configfile = os.path.join(request.folder, 'private', 'appconfig_dist.ini')
+    myconf = AppConfig(configfile=configfile)
 
 if not request.env.web2py_runtime_gae:
     # ---------------------------------------------------------------------
