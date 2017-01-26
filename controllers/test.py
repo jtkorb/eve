@@ -12,3 +12,8 @@ def test_two(a, b):
     9
     '''
     return 0
+
+def doit():
+    mail.send(to=['jtkorb@bikmort.com'],
+              subject='another message',
+              message='hi there.  looking for a good from line')
