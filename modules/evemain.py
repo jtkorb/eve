@@ -130,10 +130,11 @@ def create_summary(db, id, args):
             item.paid += row.wallet.quantity * row.wallet.price
 
     # Add Asset quantities to Summary objects (adding new Summary objects as necessary)...
-    r = db(db.assets.user_id == id).select(db.assets.type_id, db.assets.quantity.sum(), groupby=db.assets.type_id)
+    s = db.assets.quantity.sum()  # need as variable to allow subscript of _extra below
+    r = db(db.assets.user_id == id).select(db.assets.type_id, s, groupby=db.assets.type_id)
     for row in r:
         type_id = row.assets.type_id
-        quantity = row._extra['SUM("assets"."quantity")'] or 1
+        quantity = row._extra[s] or 1
         if type_id in by_type_id:
             by_type_id[type_id].quantity += quantity
         else:
